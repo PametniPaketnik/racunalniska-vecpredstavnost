@@ -25,39 +25,48 @@ def read_bmp_image(image_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def get_pixel_value(image, x, y):
+    if image.mode == 'L':
+        return image.getpixel((x, y))
+
+    elif image.mode == 'RGB':
+        return image.getpixel((x, y))[0]
 
 def predict(P, X, Y):
     E = []
 
     for x in range(Y):
         for y in range(X):
-            value_to_append = P.getpixel((x, y))
+            current_val = get_pixel_value(P, x, y)
+            value_to_append = P.getpixel((x, y))  # Dodajte to vrstico
 
             if x == 0 and y == 0:
                 pass
             elif y == 0:
-                value_to_append = P.getpixel((x - 1, 0)) - P.getpixel((x, 0))
+                prev_val = get_pixel_value(P, x - 1, 0)
+                value_to_append = prev_val - current_val
             elif x == 0:
-                value_to_append = P.getpixel((0, y - 1)) - P.getpixel((0, y))
+                prev_val = get_pixel_value(P, 0, y - 1)
+                value_to_append = prev_val - current_val
             else:
-                current_val = P.getpixel((x, y))
-                max_val = max(P.getpixel((x - 1, y)), P.getpixel((x, y - 1)))
-                min_val = min(P.getpixel((x - 1, y)), P.getpixel((x, y - 1)))
+                val1 = get_pixel_value(P, x - 1, y)
+                val2 = get_pixel_value(P, x, y - 1)
+                val3 = get_pixel_value(P, x - 1, y - 1)
 
-                if P.getpixel((x - 1, y - 1)) >= max_val:
+                max_val = max(val1, val2)
+                min_val = min(val1, val2)
+
+                if val3 >= max_val:
                     value_to_append = min_val - current_val
-                elif P.getpixel((x - 1, y - 1)) <= min_val:
+                elif val3 <= min_val:
                     value_to_append = max_val - current_val
                 else:
-                    value_to_append = (
-                            P.getpixel((x - 1, y))
-                            + P.getpixel((x, y - 1))
-                            - P.getpixel((x - 1, y - 1))
-                            - current_val
-                    )
+                    value_to_append = (val1 + val2 - val3 - current_val)
+
             E.append(value_to_append)
 
     return E
+
 
 
 def setHeader(X, min_val, max_val, n):
@@ -114,25 +123,30 @@ def encode(B, g, m):
 
 def compress(P, X, Y):
     predicted_val = predict(P, X, Y)
+    #print(predicted_val)
     N = [predicted_val[0]]
 
-    for i in range(1, X*Y):
-        if (predicted_val[i] == 0):
+    for i in range(1, X * Y):
+        if predicted_val[i] == 0:
             N.append(0)
-        elif (predicted_val[i] > 0):
+        elif predicted_val[i] > 0:
             N.append(2 * predicted_val[i])
         else:
             N.append(2 * abs(predicted_val[i]) - 1)
 
-    C = [N[0]]
-    for i in range(1, X*Y):
+    #print(N)
+    if P.mode == 'L':
+       C = [N[0]]
+    elif P.mode == 'RGB':
+       C = [N[0][0]]
+
+    for i in range(1, X * Y):
         C.append(N[i] + C[i - 1])
 
-    n = X*Y
-    B = setHeader(X, C[0], C[n-1], n)
-    Bic = IC(B, C, 0, n-1)
+    n = X * Y
+    B = setHeader(X, C[0], C[n - 1], n)
+    Bic = IC(B, C, 0, n - 1)
     return predicted_val, N, C, B, Bic
-
 
 def decodeheader(B):
     n = int(B[0], 2)
@@ -266,8 +280,10 @@ def save_as_bmp(dec_img, file_path, org_mode):
     try:
         if org_mode == 'L':
             dec_img = dec_img.convert('L')  # Convert to 8-bit grayscale
+            print("L")
         elif org_mode == 'RGB':
             dec_img = dec_img.convert('RGB')  # Convert to 24-bit RGB
+            print("RGB")
         dec_img.save(file_path)
 
         print(f"Image saved successfully at {file_path}")
@@ -316,7 +332,7 @@ def compressImages(image_path):
 
 
 if __name__ == "__main__":
-    image_path = "slike BMP/Lena.bmp"
+    image_path = "slike BMP/Monarch.bmp"
 
     slika, pixel_values, Y, X, original_mode = read_bmp_image(image_path)
     # print("Pixel values:", pixel_values)
