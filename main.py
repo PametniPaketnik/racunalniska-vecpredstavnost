@@ -332,7 +332,7 @@ def compressImages(image_path):
 
 
 if __name__ == "__main__":
-    image_path = "slike BMP/Monarch.bmp"
+    image_path = "img.png"
 
     slika, pixel_values, Y, X, original_mode = read_bmp_image(image_path)
     # print("Pixel values:", pixel_values)
@@ -345,7 +345,7 @@ if __name__ == "__main__":
     # print("N Values:", N)
     # print("C Values:", C)
     # print("Header:", B)
-    # print("BIC:", Bic)
+    print("BIC:", Bic)
 
     decImg = decompress(Bic)
     dec_img_path = "decompressed.bmp"

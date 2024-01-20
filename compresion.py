@@ -151,10 +151,11 @@ def compress(P, X, Y):
 
 if __name__ == "__main__":
     # image_path = "slike BMP/Monarch.bmp"
+    #print("hello")
     image_path = sys.argv[1]
-    print("pot " + image_path)
+    #print("POT " + image_path)
 
-    #slika, pixel_values, Y, X, original_mode = read_bmp_image(image_path)
+    slika, pixel_values, Y, X, original_mode = read_bmp_image(image_path)
 
-    #predicted_values, N, C, B, Bic = compress(slika, X, Y)
-    #print("Pixel values:", Bic)
+    predicted_values, N, C, B, Bic = compress(slika, X, Y)
+    print(Bic)

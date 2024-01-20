@@ -2,6 +2,7 @@ import math
 
 from PIL import Image
 from math import log2
+import ast
 import os
 import time
 import sys
@@ -138,28 +139,29 @@ def decompress(B):
 def save_as_bmp(dec_img, file_path):
     try:
         dec_img = dec_img.convert('L')  # Convert to 8-bit grayscale
-        print("L")
+        #print("L")
         dec_img.save(file_path)
 
         print(f"Image saved successfully at {file_path}")
     except Exception as e:
         print(f"An error occurred: {e}")
-    my_img = Image.open(file_path)
-    my_img.show()
-
-def read_file_content(file_path):
-    with open(file_path, 'r') as file:
-        file_content = file.read().strip()  # Uporabite read() namesto readlines()
-    return [file_content]
+    #my_img = Image.open(file_path)
+    #my_img.show()
 
 if __name__ == "__main__":
     input_file_path = sys.argv[1]
-    print(input_file_path)
-    Bic = read_file_content(input_file_path)
+    username = sys.argv[2]
+    #print(input_file_path)
 
+    with open(input_file_path, 'r') as file:
+        content = file.read()
+        binary_data = ast.literal_eval(content)
 
-    print(Bic)
-    #decImg = decompress(Bic1)
+    #print(binary_data)
+
+    decImg = decompress(binary_data)
     #print(decImg)
-    #dec_img_path = "decompressed.bmp"
-    #save_as_bmp(decImg, dec_img_path)
+
+
+    bmp_file_name = f"{username}_decompressed.bmp"
+    save_as_bmp(decImg, bmp_file_name)
